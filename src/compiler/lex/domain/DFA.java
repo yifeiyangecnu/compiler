@@ -14,8 +14,11 @@ public class DFA {
 	final static String REAL_WITH_LEFT_EXPONET_REGEX=EXPONET_REGEX+"."+INT_REGEX;
 	final static String REAL_WITH_RIGHT_EXPONET_REGEX=INT_REGEX+"."+EXPONET_REGEX;
 	final static String REAL_WITH_BOTH_EXPONET_REGEX=EXPONET_REGEX+"."+EXPONET_REGEX;
+	final static int STATES_OFFSET=1000;//用于有括号的闭包，此时只是为保证状态编号唯一
 		public static void main(String[] args)
 		{
+			log(match("ababc","(ab)*c"));
+			log(match("ababc","(ab)*c(ab)*"));
 			log(match("abc","abc"));
 			log(match("abdgh","ab*c*d|e|fgh"));
 			log(match("abc",ID_REGEX));
@@ -30,8 +33,15 @@ public class DFA {
 			log(match("2e+3.3",REAL_WITH_LEFT_EXPONET_REGEX));
 			log(match("2e+3.3E-4",REAL_WITH_BOTH_EXPONET_REGEX));
 			log(match("23.3E-4",REAL_WITH_RIGHT_EXPONET_REGEX));
-			
 		}
+		/**
+		 * 正则匹配
+		 * 可匹配 形如： abc   a|b|c   a*b* 三种的任意组合形式， 例如：a|bc*d 但不支持括号
+		 * 同时支持形如 (abc)*的特殊处理，此时括号不能嵌套，输出的状态编号不准确，但是符合自定义规则
+		 * @param str
+		 * @param regex
+		 * @return
+		 */
 		public static boolean match(String str,String regex)
 		{
 			Map<StateTrans,Integer> dfa=new HashMap<>();
@@ -64,6 +74,7 @@ public class DFA {
 		
 		private static void printDfa(Map<StateTrans,Integer> dfa, int statecount)
 		{
+			System.out.printf("开始状态为 0 结束状态为 %d\n",statecount);
 			dfa.keySet().stream().sorted().forEach(arg0->{
 				System.out.printf("从状态 %d 输入 %c 到达 状态 %d \n", statecount+arg0.state,arg0.input,statecount+dfa.get(arg0).intValue());
 			});
@@ -84,7 +95,28 @@ public class DFA {
 					{
 						return -1;
 					}
-					dfa.put(new StateTrans(regex.charAt(pos), state), state);
+					if(regex.charAt(pos)==')')
+					{
+						int temp=state+STATES_OFFSET;
+						int count=0;//括号内字符数
+						while(regex.charAt(--pos)!='(')
+						{
+							++count;
+						}
+						dfa.put(new StateTrans(regex.charAt(pos+1), state),(temp));
+						for(int i=2;i<count;i++)
+						{
+							dfa.put(new StateTrans(regex.charAt(pos+i), temp),(temp++));
+						}
+						if(count>=2)
+						{
+							dfa.put(new StateTrans(regex.charAt(pos+count),temp),state);
+						}
+					}
+					else
+					{
+						dfa.put(new StateTrans(regex.charAt(pos), state), state);
+					}
 				}
 				else if(regex.charAt(pos)=='|')
 				{
