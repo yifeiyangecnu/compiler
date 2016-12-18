@@ -684,16 +684,16 @@ public class LL
 		List<Integer>tokenlinepos=new ArrayList<Integer>();
 		for(int i=0;i<100;i++)
 			tokenlinepos.add(i);
-		analysis(analysisstr, tokenlinepos);       
+		analysis(analysisstr, tokenlinepos, null);       
 	}
-	public List<String> analysis(List<String> analysisstr, List<Integer> tokenlinepos)
+	public List<String> analysis(List<String> analysisstr, List<Integer> tokenlinepos, List<StackMessage> stackMessages)
 	{
 		List<String> errors=new ArrayList<>();
 		Stack<String>oldstrstack=new Stack<String>();
 		Stack<String>strstack=new Stack<String>();
 		strstack.push("$");
 		strstack.push("program");//非终结符栈
-			
+		
 		logInfo("栈:                                 "+"输入:                                   "+"动作:                              \n");
 		int linecount=1;
 		int analysisId=0;
@@ -701,17 +701,22 @@ public class LL
 		boolean pop=true;
 		while(analysisId!=analysisstr.size()-1)
 		{
+			StackMessage stackMessage=new StackMessage("", "", "");
+			StringBuilder sb=new StringBuilder();
 			for(int x=0;x<strstack.size();x++)
 			{
-				logInfo(strstack.get(x));
+				sb.append(logInfo(strstack.get(x)));
 			}
+			stackMessage.setStack(sb.toString());
 			logInfo("                           ");
 			
 			//输入信息
+			sb=new StringBuilder();
 			for(int x=analysisId;x<analysisstr.size();x++)
 			{
-				logInfo(analysisstr.get(x));                          
+				sb.append(logInfo(analysisstr.get(x)));                          
 			}
+			stackMessage.setInput(sb.toString());
 			logInfo("                           ");
 			
 			String nonterminal=strstack.peek();
@@ -719,10 +724,12 @@ public class LL
 		     {
 			   if(nonterminal.equals(analysisElem))
 			  {
-				matchaction(analysisElem);
+				stackMessage.setAction(matchaction(analysisElem));
+				
 				analysisId++;
 				analysisElem=analysisstr.get(analysisId);
 				strstack.pop();	
+				stackMessages.add(stackMessage);
 				//if(!LLanaTable.containsRow(strstack.peek()))oldstrstack=(Stack<String>) strstack.clone();
 				//if(nonterminal.equals(";")||nonterminal.equals("{")||nonterminal.equals("}"))linecount++;
 				continue;
@@ -732,7 +739,8 @@ public class LL
 				   if(pop)
 				   {
 					   strstack.pop();
-					   jumptopTerminal(nonterminal);
+					   stackMessage.setAction(jumptopTerminal(nonterminal));
+					   stackMessages.add(stackMessage);
 					   continue;
 				   }
 				  /* else 
@@ -765,6 +773,7 @@ public class LL
 						if(analysisElem.equals("int")||analysisElem.equals("real"))
 							{
 							logInfo("变量声明: "+analysisElem+"\n");
+							stackMessage.setAction("变量声明: "+analysisElem);
 							 analysisId++;
 							 analysisElem=analysisstr.get(analysisId);
 							}
@@ -828,47 +837,57 @@ public class LL
 						    if(rightstr[l-1].equals("ε"))continue;
 						    else strstack.push(rightstr[l-1]);
 						}
-					outputaction(production);	
+					   stackMessage.setAction(outputaction(production));	
 					break;
 				  }
 					else 
 					{
-						jumptopNonterminal(topNonterminal);
+						stackMessage.setAction(jumptopNonterminal(topNonterminal));
 						break;
 					}
 				}
 			}
+			stackMessages.add(stackMessage);
 		}
+		StringBuilder sb=new StringBuilder();
+		StackMessage stackMessage=new StackMessage("","","");
 		for(int x=0;x<strstack.size();x++)
 		{
-			logInfo(strstack.get(x));
+			sb.append(logInfo(strstack.get(x)));
 		}
+		stackMessage.setStack(sb.toString());
 		logInfo("                           ");
 		
 		//输入信息
+		sb=new StringBuilder();
 		for(int x=analysisId;x<analysisstr.size();x++)
 		{
-			logInfo(analysisstr.get(x));
+			sb.append(logInfo(analysisstr.get(x)));
 		}
+		stackMessage.setInput(sb.toString());
 		logInfo("                           ");
+		stackMessages.add(stackMessage);
 		return errors;
 
 		}
 	
 	
-	protected void jumptop(String str)
+	protected String jumptop(String str)
     {
     	logInfo("栈顶之下的一个字符匹配跳过当前栈顶字符: "+str+"\n");
+    	return "栈顶之下的一个字符匹配跳过当前栈顶字符: "+str;
     }
-	protected void outputaction(String str)
+	protected String outputaction(String str)
 	{
 		logInfo("输出 "+str);
 		logInfo("                              \n");
+		return "输出 "+str;
 	}
-	protected void matchaction(String str)
+	protected String matchaction(String str)
 	{
 		logInfo("匹配 "+str);
 		logInfo("                              \n");
+		return "匹配 "+str;
 	}
     protected void error(int i ,String str, List<String> errors)
     {
@@ -879,9 +898,10 @@ public class LL
     final String logPath="d:/log/";
     final String infoLogPath=logPath+"info/";
     final String errLogPath=logPath+"err/";
-    void logInfo(Object object)
+    String logInfo(Object object)
     {
     	System.out.print(object);
+    	return object.toString();
 //	 	log(infoLogPath,"logInfo_",object.toString());    	
     }
     
@@ -921,13 +941,15 @@ public class LL
     
     
 
-protected void jumptopTerminal(String str)
+protected String jumptopTerminal(String str)
     {
     	logInfo("栈顶终结符: "+str+"不匹配，跳过"+'\n');
+    	return "栈顶终结符: "+str+"不匹配，跳过";
     }
-    protected void jumptopNonterminal(String str)
+    protected String jumptopNonterminal(String str)
     {
     	logInfo("弹出栈顶非终结符!"+'\n');
+    	return "弹出栈顶非终结符!";
     }
 }
 
