@@ -5,6 +5,7 @@
   import="compiler.lex.domain.TokenColorType"
   import="compiler.lex.domain.LexError"
   import="compiler.lex.domain.Symbol"
+  import="compiler.lex.domain.StackMessage"
   %>
 <!-- <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
     "http://www.w3.org/TR/html4/loose.dtd">  -->
@@ -48,6 +49,7 @@ table.gridtable td {
     List<String> terminals=(List<String>)request.getAttribute("terminals");
     List<String> nonterminals=(List<String>)request.getAttribute("nonterminals");
     List<String> gramErrors=(List<String>)request.getAttribute("gramErrors");
+    List<StackMessage> stackMessage=(List<StackMessage>)request.getAttribute("stackMessage");
     Integer row=(Integer)request.getAttribute("row");
     Integer column=(Integer)request.getAttribute("column");
 %>
@@ -101,6 +103,8 @@ table.gridtable td {
 				</a>
 			
 			</li>
+		
+			
 		</ul>
 	</div>
 	<div class="cd-content-block">
@@ -152,6 +156,7 @@ table.gridtable td {
    <% }%>
 				</div> 
 			</li>
+			
 		</ul>
 		<button class="cd-close">关闭</button>
 	</div>
@@ -179,7 +184,21 @@ table.gridtable td {
 				</tr>
 			<%} %>
 			</table>	
-
+			<h2>语法栈:</h2>
+<%if(null!=stackMessage)
+{%>
+<table  class="gridtable"   >
+<tr><th>栈</th><th>输入</th><th>动作</th></tr>
+     <%for(StackMessage message:stackMessage){
+    %>
+       <tr>
+       <td><%=message.getStack()%></td>
+       <td><%=message.getInput() %></td>
+       <td><%=message.getAction() %></td>
+        <%} %>
+        </tr>
+ </table>
+<%} %>
 <script src="js/jquery-2.1.4.js"></script>
 <script src="js/main.js"></script>
 <script src="adv-banners/ads.js"></script>

@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import compiler.lex.domain.LL;
 import compiler.lex.domain.LexError;
 import compiler.lex.domain.Output;
+import compiler.lex.domain.StackMessage;
 import compiler.lex.domain.Symbol;
 import compiler.lex.service.TokenService;
 import compiler.lex.service.TokenServiceImpl;
@@ -72,8 +73,13 @@ public class TextSourceServlet extends HttpServlet {
 				test.first();
 				test.follow();
 				List<String> productions=test.print_table();
-				List<String> gramErrors=test.analysis(tokens,  tokenLinePos);
-				System.out.println();			
+				List<StackMessage> stackMessage=new ArrayList<>();
+				List<String> gramErrors=test.analysis(tokens,  tokenLinePos, stackMessage);
+				System.out.println("66666");			
+				System.out.println(stackMessage.size());			
+				stackMessage.forEach(message->{
+					System.err.printf("%s\t%s\t%s\n", message.getStack(),message.getInput(),message.getAction());
+				});
 //				for(int i=0;i<test.column;++i)
 //				{
 //					System.out.print("\t"+test.terminals.get(i));
@@ -94,6 +100,7 @@ public class TextSourceServlet extends HttpServlet {
 				request.setAttribute("row", test.row);
 				request.setAttribute("column", test.column);
 				request.setAttribute("gramErrors", gramErrors);
+				request.setAttribute("stackMessage", stackMessage);
 			}
 			else{
 					System.err.println("ÓÐ´Ê·¨´íÎó");
