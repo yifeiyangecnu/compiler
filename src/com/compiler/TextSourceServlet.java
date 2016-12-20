@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import compiler.lex.domain.Graphic;
 import compiler.lex.domain.LL;
 import compiler.lex.domain.LexError;
 import compiler.lex.domain.Output;
@@ -65,9 +66,10 @@ public class TextSourceServlet extends HttpServlet {
 	}
 
 	static void setAttribute(HttpServletRequest request, List<Symbol> symbols,
-			List<LexError> errors, List<Output> outputs, List<String> tokens, List<Integer> tokenLinePos) {
+			List<LexError> errors, List<Output> outputs, List<String> tokens, List<Integer> tokenLinePos) throws IOException {
 			if(errors.isEmpty())
 			{
+				
 				LL test=new LL();
 				test.simplify();
 				test.first();
@@ -75,6 +77,8 @@ public class TextSourceServlet extends HttpServlet {
 				List<String> productions=test.print_table();
 				List<StackMessage> stackMessage=new ArrayList<>();
 				List<String> gramErrors=test.analysis(tokens,  tokenLinePos, stackMessage);
+				Graphic graphic = new Graphic("D:\\Program Files (x86)\\Graphviz2.37\\bin\\gvedit.exe",test.getGraphicList());
+				graphic.getmain();
 				System.out.println("66666");			
 				System.out.println(stackMessage.size());			
 				stackMessage.forEach(message->{
