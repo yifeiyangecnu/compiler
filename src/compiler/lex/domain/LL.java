@@ -37,6 +37,7 @@ public class LL
     public List<String> terminals=new ArrayList<>();
     ArrayList<String>values = new ArrayList<String>();
     ArrayList<String>mothers = new ArrayList<String>();
+    private ArrayList<String>saveout=new ArrayList<String>();
     public int row=0;
     public int column=0;
 	
@@ -699,8 +700,27 @@ public class LL
 		int analysisId=0;
 		String analysisElem=analysisstr.get(analysisId);
 		boolean pop=true;
+		boolean recover=false;//1220
+		HashMap<String,Integer>jumpon=new HashMap<String,Integer>();//1220
 		while(analysisId!=analysisstr.size()-1)
 		{
+			if(strstack.empty())
+			{
+				if(recover)
+				{
+					if(jumpon.containsKey(analysisElem))
+					{
+						analysisId++;
+						analysisElem=analysisstr.get(analysisId);
+						strstack=(Stack<String>) oldstrstack.clone();
+						recover=false;
+						System.out.println("recover the stack");
+						errors.add("恢复栈状态，同时跳过当前字符!"+'\n');
+					}
+					else break;
+				}
+				break;
+			}
 			StackMessage stackMessage=new StackMessage("", "", "");
 			StringBuilder sb=new StringBuilder();
 			for(int x=0;x<strstack.size();x++)
@@ -803,6 +823,12 @@ public class LL
 										}
 									if(cur_terminal_pro.containsKey(stackelem)&&!cur_terminal_pro.get(stackelem).equals("synch"))
 									{
+										if(!recover)
+										{//有可能在添加后一直跳不过去，此时就要恢复栈，并向前进来分析一个
+										     jumpon.put(analysisElem, analysisId);
+										     oldstrstack=(Stack<String>) strstack.clone();
+										     recover=true;
+										}//
 										int linepos=tokenlinepos.get(analysisId);
 										analysisElem=analysisstr.get(analysisId);
 										logInfo("第"+linepos+"行缺少"+stackelem+'\n');
@@ -816,7 +842,7 @@ public class LL
 								{
 									linecount=tokenlinepos.get(analysisId);
 									error(tokenlinepos.get(analysisId),analysisElem, errors);
-								    analysisId++;
+								    analysisId+=2;
 								    analysisElem=analysisstr.get(analysisId);
 								    break;
 								}
@@ -881,12 +907,14 @@ public class LL
 	{
 		logInfo("输出 "+str);
 		logInfo("                              \n");
+		solve(str);
 		return "输出 "+str;
 	}
 	protected String matchaction(String str)
 	{
 		logInfo("匹配 "+str);
 		logInfo("                              \n");
+		solve(str);
 		return "匹配 "+str;
 	}
     protected void error(int i ,String str, List<String> errors)
@@ -937,8 +965,21 @@ public class LL
 			e.printStackTrace();
 		}
     }
-    
-    
+    public ArrayList<String>getGraphicList()
+	{
+		return saveout;
+	}
+    private void solve(String str)
+	{
+		if(str.contains("-->"))
+			{
+			int pos=str.indexOf("-->");
+			StringBuffer stringBuffer = new StringBuffer(str);
+	        stringBuffer.insert(pos+3, " ");
+	        saveout.add("输出 "+stringBuffer.toString());
+			}
+		else saveout.add("匹配 "+str);
+	}   
     
 
 protected String jumptopTerminal(String str)
