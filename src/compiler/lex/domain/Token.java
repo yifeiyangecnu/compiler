@@ -4,7 +4,7 @@ package compiler.lex.domain;
  * @version 1.0
  * @created 13-11ÔÂ-2016 9:29:55
  */
-public class Input {
+public class Token {
 
 	private int lineNumber;
 	private int linePostion;
@@ -12,14 +12,14 @@ public class Input {
 	private String tokenName;
 	
 	
-	public Input(int lineNumber, int linePostion, String tokenType) {
+	public Token(int lineNumber, int linePostion, String tokenType) {
 		super();
 		this.lineNumber = lineNumber;
 		this.linePostion = linePostion;
 		this.tokenName = tokenType;
 	}
 
-	public Input(int lineNumber, int linePostion, String value, String tokenType) {
+	public Token(int lineNumber, int linePostion, String value, String tokenType) {
 		super();
 		this.lineNumber = lineNumber;
 		this.linePostion = linePostion;
@@ -35,7 +35,7 @@ public class Input {
 		this.tokenName = tokenType;
 	}
 
-	public Input(){
+	public Token(){
 
 	}
 

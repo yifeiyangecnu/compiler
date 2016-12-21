@@ -6,7 +6,7 @@ import java.util.List;
 
 import compiler.lex.Exception.LexException;
 import compiler.lex.Exception.MyException;
-import compiler.lex.domain.Input;
+import compiler.lex.domain.Token;
 import compiler.lex.domain.LexError;
 import compiler.lex.domain.Output;
 import compiler.lex.domain.Symbol;

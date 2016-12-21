@@ -716,6 +716,7 @@ public class LL
 						recover=false;
 						System.out.println("recover the stack");
 						errors.add("恢复栈状态，同时跳过当前字符!"+'\n');
+						continue;
 					}
 					else break;
 				}
@@ -752,7 +753,31 @@ public class LL
 				stackMessages.add(stackMessage);
 				//if(!LLanaTable.containsRow(strstack.peek()))oldstrstack=(Stack<String>) strstack.clone();
 				//if(nonterminal.equals(";")||nonterminal.equals("{")||nonterminal.equals("}"))linecount++;
-				continue;
+				if(analysisId==analysisstr.size()-1&&!strstack.empty())
+				{
+					nonterminal=strstack.peek();
+					while(!strstack.empty())
+					{		    
+						if(nonterminal.equals(analysisElem))
+						{
+							matchaction(analysisElem);
+							analysisId++;
+							if(analysisId<=analysisstr.size()-1)analysisElem=analysisstr.get(analysisId);
+							strstack.pop();
+							continue;
+						}
+					    if(terminals.contains(nonterminal))
+					    {
+					    	int linepos=tokenlinepos.get(analysisId);
+					    	System.out.println("第"+linepos+"行输入缺少"+nonterminal);
+					    	errors.add("第"+linepos+"行输入缺少"+nonterminal);
+					    	strstack.pop();
+					    	break;
+					    }
+					    else break;
+					}
+				}
+				else continue;
 			  }
 			   else
 			   {
@@ -761,6 +786,8 @@ public class LL
 					   strstack.pop();
 					   stackMessage.setAction(jumptopTerminal(nonterminal));
 					   stackMessages.add(stackMessage);
+					   int linepos=tokenlinepos.get(analysisId);
+					   errors.add("第"+linepos+"行缺少"+nonterminal);
 					   continue;
 				   }
 				  /* else 
@@ -843,7 +870,12 @@ public class LL
 									linecount=tokenlinepos.get(analysisId);
 									error(tokenlinepos.get(analysisId),analysisElem, errors);
 								    analysisId+=2;
-								    analysisElem=analysisstr.get(analysisId);
+								    if(analysisId<=analysisstr.size()-1)analysisElem=analysisstr.get(analysisId);
+								    else 
+								    	{
+								    	    analysisElem=analysisstr.get(analysisstr.size()-1);
+								    	    analysisId=analysisstr.size()-1;
+								    	}
 								    break;
 								}
 							}

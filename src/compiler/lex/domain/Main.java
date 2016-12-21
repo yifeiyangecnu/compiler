@@ -34,7 +34,6 @@ public class Main
 		try {
 			test.analysis();
 		} catch (IOException e) {
-			// TODO 自动生成的 catch 块
 			e.printStackTrace();
 		}
 	}

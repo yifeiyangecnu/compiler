@@ -108,6 +108,13 @@ public class TextSourceServlet extends HttpServlet {
 			}
 			else{
 					System.err.println("ÓÐ´Ê·¨´íÎó");
+					request.setAttribute("terminals", null);
+					request.setAttribute("nonterminals", null);
+					request.setAttribute("productions", null);
+					request.setAttribute("row", 0);
+					request.setAttribute("column", 0);
+					request.setAttribute("gramErrors", null);
+					request.setAttribute("stackMessage", null);
 				}
 			request.setAttribute("symbols",
 					symbols);
@@ -115,5 +122,6 @@ public class TextSourceServlet extends HttpServlet {
 					outputs);
 			request.setAttribute("errors",
 					errors);
+
 	}
 }

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import compiler.lex.Exception.LexException;
 import compiler.lex.Exception.MyException;
-import compiler.lex.domain.Input;
+import compiler.lex.domain.Token;
 import compiler.lex.domain.LexConfig;
 import compiler.lex.domain.LexError;
 import compiler.lex.domain.Output;
@@ -23,12 +23,12 @@ import compiler.lex.domain.TokenType;
 public class TokenServiceImpl implements TokenService{
 	
 	
-	private List<Input> handleSourceInput(String source,List<LexError> errors/*out*/) throws MyException
+	private List<Token> handleSourceInput(String source,List<LexError> errors/*out*/) throws MyException
 	{
 		String lines[]=source.split("\n");
 		int lineNumber=1;//行号从1开始编号
 		int linePostion=0;//字符在行中的位置从0开始
-		List<Input> inputs=new ArrayList<Input>();
+		List<Token> inputs=new ArrayList<Token>();
 		for(int i=0;i<lines.length;++i)
 		{
 			String line=lines[i];
@@ -42,7 +42,7 @@ public class TokenServiceImpl implements TokenService{
 	}
 
 	private void handleLine(List<LexError> errors, int lineNumber,
-			int linePostion, List<Input> inputs, String line)
+			int linePostion, List<Token> inputs, String line)
 			throws MyException {
 		if(!isCommentLine(line)&&!line.isEmpty())
 		{
@@ -54,19 +54,19 @@ public class TokenServiceImpl implements TokenService{
 					continue;
 				if(LexConfig.isKeywordOrOperatorOrDelimeiter(word))
 				{
-					inputs.add(new Input(lineNumber,linePostion,word,TokenType.getTokenNameByToken(word)));
+					inputs.add(new Token(lineNumber,linePostion,word,TokenType.getTokenNameByToken(word)));
 				}
 				else if(LexConfig.isInt(word)||LexConfig.isReal(word))
 				{
-					inputs.add(new Input(lineNumber,linePostion,word,TokenType.NUM.getTokenName()));
+					inputs.add(new Token(lineNumber,linePostion,word,TokenType.NUM.getTokenName()));
 				}
 				else if(LexConfig.isIdentifier(word))
 				{
-					inputs.add(new Input(lineNumber,linePostion,word,TokenType.IDENTIFIER.getTokenName()));
+					inputs.add(new Token(lineNumber,linePostion,word,TokenType.IDENTIFIER.getTokenName()));
 				}
 				else
 				{
-					inputs.add(new Input(lineNumber,linePostion,word,TokenType.UNFAIR.getTokenName()));
+					inputs.add(new Token(lineNumber,linePostion,word,TokenType.UNFAIR.getTokenName()));
 					errors.add(new LexError(lineNumber,linePostion,word));
 				}
 				linePostion+=word.length();
@@ -81,6 +81,7 @@ public class TokenServiceImpl implements TokenService{
 		String tempWords[]=line.split("\\s+");
 		for(String str:tempWords)
 		{
+			boolean isLexError=false;
 			do{
 			int length = str.length();
 			int i=length;
@@ -90,7 +91,14 @@ public class TokenServiceImpl implements TokenService{
 				if(LexConfig.isSeparate(temp))
 				{
 					if(i<length)
+					if(i<str.length())
 					{
+						isLexError = LexConfig.isInt(temp)&&LexConfig.isIdentifier(str.substring(i,i+1));
+						if(isLexError)//若是词法错误则不分割
+						{
+							words.add(temp+str.substring(i));
+							break;
+						}
 						words.add(temp);
 						str=str.substring(i);
 					}
@@ -103,7 +111,7 @@ public class TokenServiceImpl implements TokenService{
 				words.add(str);
 				break;
 			}
-			}while(true);
+			}while(!isLexError);
 		}
 		for(String str:words)
 		{
@@ -112,12 +120,12 @@ public class TokenServiceImpl implements TokenService{
 		return words;
 	}
 
-	private List<Input> handleFileInput(String fileName,List<LexError> errors/*out*/) throws FileNotFoundException, MyException, LexException {
+	private List<Token> handleFileInput(String fileName,List<LexError> errors/*out*/) throws FileNotFoundException, MyException, LexException {
 		
 		Scanner scanner=new Scanner(new File(fileName));
 		int lineNumber=1;//行号从1开始编号
 		int linePostion=0;//字符在行中的位置从0开始
-		List<Input> inputs=new ArrayList<Input>();
+		List<Token> inputs=new ArrayList<Token>();
 		while(scanner.hasNextLine())
 		{
 			String line=scanner.nextLine();
@@ -150,12 +158,12 @@ public class TokenServiceImpl implements TokenService{
 	@Override
 	public void writeTokensToFile(String outputFilename, String sourceFilename) throws IOException, MyException, LexException {
 		List<LexError> errors=new ArrayList<LexError>();
-		List<Input> tokens=handleFileInput(sourceFilename, errors);
+		List<Token> tokens=handleFileInput(sourceFilename, errors);
 		File file = new File(outputFilename);
 		if(!file.exists())
 			file.createNewFile();
 		PrintWriter out=new PrintWriter(file);
-		for(Input input:tokens)
+		for(Token input:tokens)
 		{
 			out.printf("%s\t", input.getTokenType());
 		}
@@ -184,7 +192,7 @@ public class TokenServiceImpl implements TokenService{
 
 	@Override
 	public List<String> getTokenListFromFile(String fileName,List<LexError> errors, List<Integer> tokenLinePos) throws FileNotFoundException, MyException, LexException {
-		List<Input> inputs = handleFileInput(fileName,errors);
+		List<Token> inputs = handleFileInput(fileName,errors);
 		inputs.forEach(input->tokenLinePos.add(input.getLineNumber()));
 		return inputs.stream()
 				.map(arg0->arg0.getTokenType()).collect(Collectors.toList());
@@ -192,14 +200,14 @@ public class TokenServiceImpl implements TokenService{
 
 	@Override
 	public List<Output> outPutTokenFromFile(String filename,List<LexError> errors) throws MyException, LexException, IOException {
-		List<Input> inputs = this.handleFileInput(filename,errors);
+		List<Token> inputs = this.handleFileInput(filename,errors);
 		return outPutTokenFromInputs(errors, inputs);
 	}
 	@Override
 	public List<Output> outPutTokenFromStr(String source, List<LexError> errors)
 			throws FileNotFoundException, MyException, LexException,
 			IOException {
-		List<Input> inputs = this.handleSourceInput(source, errors);
+		List<Token> inputs = this.handleSourceInput(source, errors);
 		return outPutTokenFromInputs(errors, inputs);
 		
 	}
@@ -209,14 +217,14 @@ public class TokenServiceImpl implements TokenService{
 	@Override
 	public List<Symbol> getSymbolListFromFile(String filename) throws FileNotFoundException, MyException, LexException {
 		List<LexError> errors=new ArrayList<LexError>();
-		List<Input> inputs=handleFileInput(filename, errors);
+		List<Token> inputs=handleFileInput(filename, errors);
 		return getSymbolListFromInputs(errors, inputs);
 	}
 
 	@Override
 	public List<String> getTokenListFromStr(String source, List<LexError> errors, List<Integer> tokenLinePos)
 			throws FileNotFoundException, MyException, LexException {
-		List<Input> inputs = handleSourceInput(source,errors);
+		List<Token> inputs = handleSourceInput(source,errors);
 		inputs.forEach(input->tokenLinePos.add(input.getLineNumber()));
 		return inputs.stream()
 				.map(arg0->arg0.getTokenType()).collect(Collectors.toList());
@@ -226,11 +234,11 @@ public class TokenServiceImpl implements TokenService{
 	
 			throws FileNotFoundException, MyException, LexException {
 		List<LexError> errors=new ArrayList<LexError>();
-		List<Input> inputs=handleSourceInput(source, errors);
+		List<Token> inputs=handleSourceInput(source, errors);
 		return getSymbolListFromInputs(errors, inputs);
 	}
 	private List<Symbol> getSymbolListFromInputs(List<LexError> errors,
-			List<Input> inputs) {
+			List<Token> inputs) {
 		if(!errors.isEmpty())
 		{
 			return null;
@@ -247,7 +255,7 @@ public class TokenServiceImpl implements TokenService{
 
 
 	private List<Output> outPutTokenFromInputs(List<LexError> errors,
-			List<Input> inputs) throws IOException {
+			List<Token> inputs) throws IOException {
 		List<Output> output=inputs.stream().map(input->
 		{
 			return new Output(input.getValue(),this.getTokenColor(input.getValue()),

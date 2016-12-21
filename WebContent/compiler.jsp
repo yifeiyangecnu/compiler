@@ -123,8 +123,7 @@ table.gridtable td {
 					<p>
 
     <center>
-<%if(null!=symbols)
-{%>
+<%if(null!=symbols){%>
 <table  class="gridtable"   >
 <tr><th >类型</th><th>值</th><th>行号</th><th>列号</th></tr>
      <%for(Symbol symbol:symbols){
@@ -146,14 +145,11 @@ table.gridtable td {
 			</li>
 			<li>
 				<div >
-    <%if(!gramErrors.isEmpty()) %>
-    <%{ %>
+    <%if(null!=gramErrors) {%>
     	<h3>共有<span><%=gramErrors.size() %></span>处语法错误</h3>
-    	<%} %>
-    <% for(String error:gramErrors)
-    {%>
+    <% for(String error:gramErrors){%>
 			<h3><%=error %></h3>
-   <% }%>
+   <% }}%>
 				</div> 
 			</li>
 			
@@ -168,6 +164,7 @@ table.gridtable td {
 <table class="gridtable">
 	<tr>
 	<th>非终结符</th>
+	<%if(null!=terminals){ %>
 	<%for(int c=0;c<column;++c)
 			{ %>
 				<th><%=terminals.get(c) %></th>
@@ -182,7 +179,7 @@ table.gridtable td {
 					<th><%=productions.get(r*column+c) %></th>;
 				<%} %>
 				</tr>
-			<%} %>
+			<%}} %>
 			</table>	
 			<h2>语法栈:</h2>
 <%if(null!=stackMessage)

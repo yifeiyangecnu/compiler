@@ -17,22 +17,19 @@ public class DFA {
 	final static int STATES_OFFSET=1000;//用于有括号的闭包，此时只是为保证状态编号唯一
 		public static void main(String[] args)
 		{
-			log(match("ababc","(ab)*c"));
-			log(match("ababc","(ab)*c(ab)*"));
-			log(match("abc","abc"));
-			log(match("abdgh","ab*c*d|e|fgh"));
-			log(match("abc",ID_REGEX));
-			log(match("a1Dbc1",ID_REGEX));
-			log(!match("1abc",ID_REGEX));
-			log(match("123",INT_REGEX));
-			log(!match("a123",INT_REGEX));
-			log(match("12.3",REAL_REGEX));
-			log(!match("123",REAL_REGEX));
-			log(match("2e+3",EXPONET_REGEX));
-			log(!match("2e+-3",EXPONET_REGEX));
-			log(match("2e+3.3",REAL_WITH_LEFT_EXPONET_REGEX));
-			log(match("2e+3.3E-4",REAL_WITH_BOTH_EXPONET_REGEX));
-			log(match("23.3E-4",REAL_WITH_RIGHT_EXPONET_REGEX));
+			log(match("abd","a*b|cd"));
+//			log(match("abc",ID_REGEX));
+//			log(match("a1Dbc1",ID_REGEX));
+//			log(!match("1abc",ID_REGEX));
+//			log(match("123",INT_REGEX));
+//			log(!match("a123",INT_REGEX));
+//			log(match("12.3",REAL_REGEX));
+//			log(!match("123",REAL_REGEX));
+//			log(match("2e+3",EXPONET_REGEX));
+//			log(!match("2e+-3",EXPONET_REGEX));
+//			log(match("2e+3.3",REAL_WITH_LEFT_EXPONET_REGEX));
+//			log(match("2e+3.3E-4",REAL_WITH_BOTH_EXPONET_REGEX));
+//			log(match("23.3E-4",REAL_WITH_RIGHT_EXPONET_REGEX));
 		}
 		/**
 		 * 正则匹配
@@ -62,6 +59,7 @@ public class DFA {
 			}
 			if(startState==terminalState)
 			{
+				System.out.println(regex+"的DFA构建如下:");
 				printDfa(dfa, statecount);
 				return true;
 			}

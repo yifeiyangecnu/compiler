@@ -85,9 +85,10 @@ public class LexConfig {
 //			//isDelimiter≤‚ ‘
 //			println(isDelimiter(";"));
 //			//isReal≤‚ ‘
-			println(isReal("1.5")); 
-			println(isReal("1555.005669"));
-			println(isReal("2E6.2"));
+			println(isIdentifier("a"));
+//			println(isReal("1.5")); 
+//			println(isReal("1555.005669"));
+//			println(isReal("2E6.2"));
 //			//isExponent≤‚ ‘
 		}
 		
@@ -95,5 +96,6 @@ public class LexConfig {
 		static void println(Object str)
 		{
 			System.out.println(str);
+
 		}
 }
